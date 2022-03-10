@@ -15,7 +15,7 @@ class TowerServerListView(LoginRequiredMixin, SingleTableMixin, FilterView):
     table_pagination = {'per_page': 10}
     table_class = TowerServerTable
     model = TowerServer
-    template_name = 'generics/list.html'
+    template_name = 'generics/list1.html'
     filterset_class = TowerServerFilter
 
     def dispatch(self, *args, **kwargs):

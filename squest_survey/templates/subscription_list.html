@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <!-- Main content -->
+    <div class="content-wrapper" style="background-color:#ffffff">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <!--<h4>Squest {% if vendors %}Instance Vendors{% else %}{{ vendor.name }} Instances{% endif %}</h4>-->
+                        <h4>Database Servers</h4>
+                    </div>
+                </div>
+            </div><!-- /.container-fluid -->
+        </section>
+        <div class="content" style="background-color:#ffffff">
+            {% if instances %}
+            <div class="row">
+                <section class="col-lg-12 connectedSortable ui-sortable">
+                    <div class="card">
+                        <div class="card-body">
+                            <table id="request_list" class="table table-striped" >
+                                <thead>
+                                    <tr>
+                                        <th>Subscription</th>
+                                        <th>Created</th>
+                                        <th>Service</th>
+                                        <th>Requests</th>
+                                        <th>State</th>
+                                        <!--<th>Opened support</th>-->
+                                        <th>DB Status</th>
+                                        <th>DB Service</th>
+                                        <!--<th>Actions</th>-->
+                                    </tr>
+                                    </thead>
+                                <tbody>
+                                {% for instance in instances %}
+                                    <tr>
+                                        <td class="align-middle" style="border:none">
+                                            <a style="color:#2e2e2e;font-size:12px;font-family: Arial, Helvetica, sans-serif;text-decoration: underline" href="{% url 'squest_survey:subscription' instance.id %}">
+                                                {{ instance.name }}
+                                            </a>
+                                        </td>
+                                        <td class="align-middle" style="border:none">
+                                            <a style="color:#2e2e2e;font-size:12px;font-family: Arial, Helvetica, sans-serif;text-decoration: underline" href="{% url 'squest_survey:subscription' instance.id %}">
+                                                {{ instance.created_at }}
+                                            </a>
+                                        </td>
+                                        <td class="align-middle" style="border:none">
+                                            <a style="color:#2e2e2e;font-size:12px;font-family: Arial, Helvetica, sans-serif">
+                                                {{ instance.service.name }}
+                                            </a>
+                                        </td>
+                                        <td class="align-middle" style="border:none">
+                                            <a style="color:#2e2e2e;font-size:12px;font-family: Arial, Helvetica, sans-serif;text-decoration: underline" href="{% url 'service_catalog:request_list'%}?instance={{ instance.name }}" class="btn btn-default bg-sm">
+                                                {{ instance.request_set.all|length }}
+                                            </a>
+                                        </td>
+                                        <td style="border:none" class="align-middle">
+                                            <span class="badge bg-{{ instance.state |map_instance_state }}">{{ instance.state }}</span>
+                                        </td>
+                                        
+                                        <td class="align-middle" style="border:none">
+                                            <a style="color:#2e2e2e;font-size:12px;font-family: Arial, Helvetica, sans-serif">
+                                                {{ instance.spec.db_status }}
+                                            </a>
+                                        </td>
+                                        <td class="align-middle" style="border:none">
+                                            <a style="color:#2e2e2e;font-size:12px;font-family: Arial, Helvetica, sans-serif;text-decoration: underline" href="{% url 'squest_survey:subscription' instance.id %}">
+                                                {{instance.service.vendors.all.first.name}}
+                                            </a>
+                                        </td>
+                                        
+                                    </tr>
+                                {%  endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

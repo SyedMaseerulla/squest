@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load render_table from django_tables2 %}
+
+{% block header_button %}
+    {% if filter %}
+        <a class="btn btn-default float-right ml-1" data-widget="control-sidebar">
+            <i class="fas fa-sliders-h"></i>
+        </a>
+    {% endif %}
+    {% if html_button_path %}
+        {% include html_button_path %}
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    <div class="container-fluid" style="background-color:#ffffff">
+        {%  for request in requests %}
+            <ul>
+                <li>{{request.instance.name}}</li>
+            </ul>
+        {% endfor %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body" style="background-color:#ffffff">
+                        {% render_table table %}
+                    </div>
+                </div>
+            </div>
+            {% if filter %}
+                <aside class="control-sidebar control-sidebar-light" style="display: block;">
+                    <div class="row">
+                        <a class="nav-link float-left" data-widget="control-sidebar">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                    <div class="p-3 control-sidebar-content">
+                        <div class="row pb-3">
+                            <h3 class="card-title"><i class="fas fa-search"></i> Filter</h3>
+                        </div>
+
+                        <!-- /.card-header -->
+                        {% include 'generics/form_edit.html' with form=filter.form action='apply' method='get' %}
+                    </div>
+                </aside>
+            {% endif %}
+        </div>
+    </div>
+    {% load static %}
+    <script src="{% static 'admin-lte/plugins/daterangepicker/daterangepicker.js' %}"></script>
+    <script src="{% static 'admin-lte/plugins/moment/moment.min.js' %}"></script>
+    <script src="{% static 'admin-lte/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.js' %}"></script>
+{% endblock %}

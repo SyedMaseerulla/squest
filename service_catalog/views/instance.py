@@ -76,6 +76,7 @@ def instance_request_new_operation(request, instance_id, operation_id):
                                                   type__in=[OperationType.UPDATE, OperationType.DELETE])
     if operation not in allowed_operations:
         raise PermissionDenied
+    return redirect('squest_survey:survey-operation', operation_id=operation_id, instance_id=instance_id)    
     parameters = {
         'operation_id': operation_id,
         'instance_id': instance_id

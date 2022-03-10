@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% load i18n static%}
+{% load prettyjson %}
+
+{% block page_css %}
+{% prettyjson_setup %}
+{% endblock %}
+
+{% block content %}
+<style>
+{% for config in configs %}
+    .sub-{{ config.mapping_value }}-class {
+        color: {{ config.text_color }} !important;
+        background-color: {{ config.field_color }} !important;
+    }
+{% endfor %}
+
+.card-body .nav-item {
+    border-right: 1px solid grey;
+    margin-right: 5px;
+    padding-right: 5px;
+}
+.card-body .nav-item:last-child {
+    border-right: none;
+}
+.jsonview {
+    background-color: #e9ecef;
+}
+.form-group.tasktab{
+	margin-left:-60px;
+  //margin-right:-15px;
+}
+.my-tab .tab-pane{
+  border:solid 0.5px grey;  
+  border-top: 0; 
+  color:black;
+}
+.myTab li a { 
+  background:#dcdcdc;
+  border-top:solid 5px #cbcbcb;
+   color:black;
+}
+.myTab li a.nav-link.active {
+  border-bottom-color: transparent;
+  border-top:solid 5px #1f8476; 
+  border-left:solid 0.5px #1f8476; 
+  background:white;
+}
+.nav-tabs {
+    margin-bottom: 0;
+}
+.btn_container1{
+   margin: 0 auto;
+  text-align: left;
+  padding-top: 15px; 
+  padding-left: 10px; 
+  //background:#e8ecec;
+  height:60px;
+}
+.dropdown-toggle::after {
+    display: none;
+}
+</style>
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show" style="margin-left: 251px;" role="alert">
+	<strong>{{ error }}
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+{% endif %}
+<!-- Main content -->
+<div class="content-wrapper" style="background-color: #ffffff;">
+	<section class="content-header">
+		<div class="container-fluid">
+			<div class="row mb-2">
+				<div class="col-sm-6">
+                    <!--<h1>Instance {{ instance.name }}</h1>-->
+				</div>
+                <div class="col-sm-4"></div>
+                <div class="col-sm-2">
+                    <ul class="navbar-nav ml-auto"  style="margin-right: 20px;">
+                        <li class="nav-item dropdown">
+                            <button class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 40px;height: 40px;border-width: 0.5px;border-radius: 5%;background-color: #ffffff;">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown3">
+                                <!--{% if user.is_superuser %}
+                                <a class="dropdown-item" href="{% url 'admin:index' %}" target="_blank"><i class="fas fa-users-cog"></i> Admin </a>
+                                {% endif %}
+                                <a class="dropdown-item" href="{% url 'profiles:profile' %}"><i class="fas fa-user"></i> User details</a>
+                                <a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a> -->
+                                {%  for operation in operations %}
+                                    
+                                    {%if operation.result %}
+                                        <p><a class="dropdown-item" href="{% url 'service_catalog:instance_request_new_operation' instance_id=instance.id operation_id=operation.operation.id %}" target="_blank"><span class="icon"><i class="{{operation.operation.icon}}" aria-hidden="true"></i></span><span class="title"> </span><span class="title">{{operation.operation.name}}</span> </a></p>
+                                    {%else%}
+                                    <!--<p class="dropdown-item"><span class="icon"><i class="{{operation.operation.icon}}" aria-hidden="true"></i></span><span class="title">{{operation.operation.name}}</span></p>-->
+                                    {%endif%}
+                                {%  endfor %}
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+			</div>
+		</div><!-- /.container-fluid -->
+	</section>
+	<div class="content">
+		<div class="container-fluid">
+            <!--<div class="card">-->
+			<!--<div class="card-body">-->
+                <div class="row">
+                {% for field in sub_panel %}
+                    {% if forloop.counter0|add:"2"|divisibleby:"2" %}
+                    <div class="align-items-start col-sm-6">
+                    <!--<form class="form-horizontal">-->
+                    {% endif %}
+                        <div class="col">
+                            <div class="form-group row">
+                                <label for="{{ field.name }}" class="col-sm-3 control-label" style="color:#2e2e2e;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;font-size: 14px;font-style: normal;">
+                                    {{ field.label|safe }}
+                                </label>
+                                
+                                <div class="col-sm-6">
+                                    {{ field }}
+                                </div>
+                            </div>
+                        </div>
+                    {% if forloop.counter0|add:"3"|divisibleby:"2" %}
+                    <!--</form>-->
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                </div>
+			   <!--</div>-->
+			   <!--</div>-->
+            {% if sub_tabs %}
+            <!--<div class="card" style="margin: 3px 3px;">-->
+				<div>
+                    <ul class="nav nav-tabs myTab" id="pills-tab" role="tablist">
+                        {% for sub_tab in sub_tabs %}
+                            <!--<li class="nav-item" role="presentation">-->
+                            <li >
+                                <!--<a class="nav-link{% if forloop.first %} active{% endif %}" id="pills-home-tab" data-toggle="tab" data-target="#pills-{{ sub_form.tab.slugify }}" type="button" role="tab" aria-controls="pills-{{ sub_form.tab.slugify }}" aria-selected="true">{{ sub_form.tab.name }}</a>-->
+                                <!--<a data-target="#pills-{{ sub_form.tab.slugify }}" data-toggle="tab">{{ sub_form.tab.name }}</a>-->
+                                <a class="nav-link{% if forloop.first %} active{% endif %}" id="pills-home-tab" data-toggle="tab" data-target="#pills-{{ sub_tab.tab.slugify }}" type="button" role="tab" aria-controls="pills-{{ sub_tab.tab.slugify }}" aria-selected="true" style="color:#000000">{{ sub_tab.tab.name }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="tab-content my-tab" id="pills-tabContent">
+                        {% for sub_tab in sub_tabs %}
+                        <div class="tab-pane show{% if forloop.first %} active{% endif %}" id="pills-{{ sub_tab.tab.slugify }}" role="tabpanel" aria-labelledby="pills-{{ sub_tab.tab.slugify }}-tab">
+                            <div class="row" style="padding: 20px;">
+                            {% for field in sub_tab %}
+                            {% if forloop.counter0|add:"2"|divisibleby:"2" %}
+                            <div class="align-items-start col-sm-6">
+                            <form class="form-horizontal">
+                            {% endif %}
+                                <!--<div class="col">-->
+                                    {%if field.field.widget.input_type == "text"%}
+                                    <div class="form-group row">
+                                        <label for="{{ field.name }}" class="col-sm-3 control-label" style="color:#2e2e2e;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;font-size: 14px;font-style: normal;">
+                                            {{ field.label|safe }}
+                                        </label>
+                                        <div class="col-sm-6">
+                                            {{ field }}
+                                        </div>
+                                    </div>
+                                    {%else%}
+                                    <div class="form-group col">
+                                        <label for="{{ field.name }}" class="col-sm-6 control-label">
+                                            {{ field.label|safe }}
+                                        </label>
+                                        <div class="col-sm-12">
+                                            {{ field }}
+                                        </div>
+                                    </div>
+                                    {%endif%}
+                                <!--</div>-->
+                            {% if forloop.counter0|add:"3"|divisibleby:"2" %}
+                            </form>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+				</div>
+			<!--</div>-->
+            {% endif %}
+		</div><!-- end container fluid -->
+	</div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+	$(() => {
+	})
+{% endblock %}

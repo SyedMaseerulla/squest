@@ -12,7 +12,7 @@ class RequestListView(LoginRequiredMixin, SingleTableMixin, FilterView):
     table_pagination = {'per_page': 10}
     table_class = RequestTable
     model = Request
-    template_name = 'generics/list.html'
+    template_name = 'generics/request_list.html'
     ordering = '-date_submitted'
 
     filterset_class = RequestFilter
@@ -29,5 +29,8 @@ class RequestListView(LoginRequiredMixin, SingleTableMixin, FilterView):
         context['title'] = "Requests"
         context['html_button_path'] = "generics/buttons/request-archived-list.html"
         if self.request.user.is_superuser:
-            context['action_url'] = reverse('service_catalog:request_bulk_delete_confirm')
+            requests = Request.objects.all().distinct()
+        else:
+            requests = get_objects_for_user(self.request.user, 'service_catalog.view_request').distinct()
+        context['requests'] = requests
         return context

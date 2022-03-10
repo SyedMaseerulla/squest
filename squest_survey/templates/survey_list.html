@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<style> 
+    h3 {
+      white-space: nowrap; 
+      
+      overflow: hidden;
+      text-overflow: ellipsis;
+      
+    }
+    
+    h3:hover {
+      overflow: visible;
+    }
+    </style>
+    <!-- Main content -->
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h4>{{ vendor_item.name }} Database Services</h4>
+                    </div>
+                    <div class="col-sm-6">
+                        {% if user.is_staff %}
+                        <a class="btn btn-info float-sm-right" href="{% url 'squest_survey:manage-surveys' %}">
+                            <i class="fas fa-wrench"></i> Manage Surveys
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div><!-- /.container-fluid -->
+        </section>
+        <div class="content">
+            <div class="row">
+                {% for survey in surveys %}
+                    <!--<div class="col-lg-3 col-sm-4 mb-3">
+                        <div class="card h-100">
+                            {% if survey.image %}
+                                <img class="card-img-fit" src="{{ survey.image.url }}" alt="">
+                            {% else %}
+                                <img class="card-img-fit" src="{% static '/squest/img/no_image.png' %}" alt="">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">
+                                    {{ survey.name }}
+                                </h5>
+                                <p class="card-text">{{ survey.description }}</p>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{% url 'squest_survey:survey-cascade' survey.id %}" class="btn btn-primary">Order</a>
+                            </div>
+                        </div>
+                    </div>-->
+                    <div class="col-lg-3 col-sm-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                        <h3 class="h5 m-t-none m-b-xs text-overflow-ellipsis"  style="padding-bottom:1px;">{{ survey.name }}</h3>
+                            <div class="row">
+                            <div class="col-sm-6">
+                            {% if survey.image %}
+                            <img width="75" height="75" alt="Oracle DB - Virtual Machine" class="card-img-fit" role="" src="{{ survey.image.url }}">
+                            {% else %}
+                                <img width="75" height="75" class="m-r-sm m-b-sm item-image pull-left" src="{% static '/squest/img/no_image.png' %}" alt="">
+                            {% endif %}
+                            </div>
+                            
+                            <div class="col-sm-6 text-muted item-short-desc break-word" aria-hidden="true" role="presentation">
+                                {{ survey.description }}
+                            </div>
+                               
+                            </div>
+                        </div>
+                            <div class="card-footer"> 
+                                <a aria-label="View Details Oracle DB - Virtual Machine" href="{% url 'squest_survey:survey-cascade' survey.id %}" class="pull-left text-muted" tabindex="-1">View Details</a> 
+                                <!-- ngIf: data.showPrices && item.hasPrice --> &nbsp; 
+                               </div>
+                    </div>
+                    </div>
+                {% endfor %}
+                
+                {% comment %} Extend DB Survey {% endcomment %}
+                {% if vendor_item.show_edb %}
+                <!--<div class="col-lg-3 col-sm-4 mb-3">
+                    <div class="card h-100">
+                        <img class="card-img-fit" src="{% static '/squest/img/edb.png' %}" alt="">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">
+                                <a href="{% url 'squest_survey:extend-database' %}" class="">Extend Database</a>
+                            </h5>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="col-lg-3 col-sm-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                        <h3 class="h5 m-t-none m-b-xs text-overflow-ellipsis"  style="padding-bottom:1px;">Oracle DB - Extend DB Disk</h3>
+                            <div class="row">
+                            <div class="col-sm-6">
+                                <img width="75" height="75" class="card-img-fit" src="{% static '/squest/img/edb.png' %}" alt="">
+                            </div>
+                            
+                            <div class="col-sm-6 text-muted item-short-desc break-word" aria-hidden="true" role="presentation">
+                                Extend Oracle DB disk of Single instance / RAC (Virtual Machine /  Baremetal Server)
+                            </div>
+                               
+                            </div>
+                        </div>
+                            <div class="card-footer"> 
+                                <a aria-label="View Details Oracle DB - Virtual Machine" href="{% url 'squest_survey:extend-database' %}" class="pull-left text-muted" tabindex="-1">View Details</a> 
+                                <!-- ngIf: data.showPrices && item.hasPrice --> &nbsp; 
+                               </div>
+                    </div>
+                    </div>
+                {% endif %}
+                
+                {% comment %} Scale Out Survey {% endcomment %}
+                {% if vendor_item.show_so %}
+                <!--<div class="col-lg-3 col-sm-4 mb-3">
+                    <div class="card h-100">
+                        <img class="card-img-fit" src="{% static '/squest/img/so.png' %}" alt="">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">
+                                <a href="{% url 'squest_survey:scale-out' %}" class="">Scale Out</a>
+                            </h5>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="col-lg-3 col-sm-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                        <h3 class="h5 m-t-none m-b-xs text-overflow-ellipsis"  style="padding-bottom:1px;">Oracle RAC DB - Scale Out</h3>
+                            <div class="row">
+                            <div class="col-sm-6">
+                                <img width="75" height="75" class="card-img-fit" src="{% static '/squest/img/edb.png' %}" alt="">
+                            </div>
+                            
+                            <div class="col-sm-6 text-muted item-short-desc break-word" aria-hidden="true" role="presentation">
+                                Add new node to Oracle DB RAC (Virtual Machine /  Baremetal Server)
+                            </div>
+                               
+                            </div>
+                        </div>
+                            <div class="card-footer"> 
+                                <a aria-label="View Details Oracle DB - Virtual Machine" href="{% url 'squest_survey:scale-out' %}" class="pull-left text-muted" tabindex="-1">View Details</a> 
+                                <!-- ngIf: data.showPrices && item.hasPrice --> &nbsp; 
+                               </div>
+                    </div>
+                    </div>
+                {% endif %}
+            </div><!-- end main card-body -->
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% load i18n static%}
+
+{% block page_css %}
+<style type="text/css">
+.form-group-hidden {
+	height: 0 !important;
+	margin-bottom: 0 !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show" style="margin-left: 251px;" role="alert">
+	<strong>{{ error }}
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+{% endif %}
+<!-- Main content -->
+<div class="content-wrapper">
+	<section class="content-header">
+		<div class="container-fluid">
+			<div class="row mb-2">
+				<div class="col-sm-6">
+					<h1>{% if not instance %} {{ template.name }} {% else %} Request an operation on instance {{ instance.name }} {% endif %}</h1>
+					<div class="survey-description"> {{ template.description|safe }} </div>
+				</div>
+			</div>
+		</div><!-- /.container-fluid -->
+	</section>
+	<div class="content">
+		<div class="container-fluid">
+			
+			<div class="card">
+				<div class="card-body">
+					{% if form.errors %}
+					<div class="alert alert-danger" role="alert">
+						{% for field in form %}
+							{% if field.errors %}
+							<li><strong>{{ field.label }}:</strong> {{ field.errors|striptags }}</li>
+							{% endif %}
+						{% endfor %}
+						{% if form.non_field_errors %}
+							{{ form.non_field_errors }}
+						{% endif %}
+					</div>
+					{% endif %}
+					<form id='survey_fm' class="form-horizontal" action="{% if operation and instance %}{% url 'squest_survey:survey-operation-request' operation_id=ids.operation_id instance_id=ids.instance_id %}{% elif ids.request_id != 0 and ids.user_id != 0 %}{% url 'squest_survey:survey-accept-request' request_id=ids.request_id user_id=ids.user_id %}{% else %}{% url 'squest_survey:survey-cascade-request' id=template.id %}{% endif %}" method="post">
+						{% csrf_token %}
+
+						{% for response_form in response_forms %}
+							{% if response_form.category.shown %}
+							<div class="card">
+								<h5 class="card-header">{{ response_form.category.description }}</h5>
+								<div class="card-body">
+							{% endif %}
+
+							{% for field in response_form.form %}
+								<div class="form-group {% if field.is_hidden %}form-group-hidden{% endif %} {% if field.errors %}has-error{% endif %}">
+									<label for="{{ field.name }}" class="col-sm-6 control-label">
+										{% if not field.is_hidden %}
+											{{ field.label|safe }}
+										{% endif %}
+										{% if field.field.required %}
+										<span class="fa fa-asterisk" style="color:red"> </span>
+										{% endif %}
+									</label>
+									<span class="help-inline" style="color:red">
+										<strong> {% for error in field.errors %}{{ error }}{% endfor %} </strong>
+									</span>
+									<br>
+									<div class="col-sm-6">
+										{{ field }}
+										{% if field.help_text %}
+										<small class="form-text text-muted">{{ field.help_text|safe }}</small>
+										{% endif %}
+									</div>
+								</div>
+							{% endfor %}
+
+							{% if response_form.category.shown %}
+								</div>
+							</div>
+							{% endif %}
+						{% endfor %}
+
+						<div class="form-group">
+							<div class="col-sm-offset-2 col-sm-10">
+								<!-- validate button -->
+								<button class="btn btn-success" type="submit">
+									<i class="nav-icon fas fa-shopping-cart"></i>
+									{% if operation and instance %}
+										{% blocktrans %}Request the operation!{% endblocktrans %}
+									{% elif ids.request_id != 0 and ids.user_id != 0 %}
+										{% blocktrans %}Accept!{% endblocktrans %}
+									{% else %}
+										{% blocktrans %}Request the service!{% endblocktrans %}
+									{% endif %}
+								</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div><!-- end container fluid -->
+	</div>
+</div>
+
+<script type="text/javascript">
+	function do_math(v1, op, v2) {
+		switch (op) {
+			case "+": return v1 + v2
+			case "-": return v1 - v2
+			case "×": return v1 * v2
+			case "÷": return v1 / v2
+		}
+	}
+
+	function calculation(question_ids, operators, calculated_question_id, calculated_question_unit) {
+		{% comment %} console.log("calculation", question_ids, operators, calculated_question_id, calculated_question_unit) {% endcomment %}
+		var valid = true
+		for (let i = 0; i < question_ids.length; i++) {
+			let value = document.querySelector("#id_question_" + question_ids[i]).value.replace(calculated_question_unit.toLowerCase(), '')
+			if (!/^[\d]+$/.test(value)) {
+				valid = false
+				break
+			}
+		}
+		if (valid) {
+			var result = Number(document.querySelector("#id_question_" + question_ids[0]).value.replace(calculated_question_unit.toLowerCase(), ''))
+			{% comment %} console.log("result", result) {% endcomment %}
+			for (let i = 1; i < question_ids.length; i++) {
+				let operator = operators[i - 1]
+				let value = Number(document.querySelector("#id_question_" + question_ids[i]).value.replace(calculated_question_unit.toLowerCase(), ''))
+				result = do_math(result, operator, value)
+				{% comment %} console.log(result, operator, value) {% endcomment %}
+			}
+			{% comment %} console.log("result", result) {% endcomment %}
+			document.querySelector("#id_question_" + calculated_question_id).value = result + calculated_question_unit
+		}
+	}
+
+	$(() => {
+		$("[name^='cascade']").change(function() {
+			if ($(this).prop('required'))
+				document.forms["survey_fm"].reportValidity()
+			else if (document.forms["survey_fm"].reportValidity()) {
+				{% if operation %}
+					$("#survey_fm").attr("action", "{% url 'squest_survey:survey-operation' operation_id=ids.operation_id instance_id=ids.instance_id %}").submit()
+				{% elif not admin_response %}
+					$("#survey_fm").attr("action", "{% url 'squest_survey:survey-cascade' id=template.id %}").submit()
+				{% else %}
+					$("#survey_fm").attr("action", "{% url 'squest_survey:survey-accept' request_id=ids.request_id user_id=ids.user_id %}").submit()
+				{% endif %}
+			}
+		})
+		{% for question in calculated_questions %}
+			var calculated_field = {}
+			{% comment %} console.log("{{ question.id }}") {% endcomment %}
+			calculated_field["calculated_question_id"] = {{ question.id }}
+			calculated_field["calculated_question_unit"] = "{{ question.calculation.unit }}"
+			calculated_field["operation_question_ids"] = []
+			calculated_field["operation_question_operators"] = []
+			{% for operation in question.calculation.operation.all %}
+				{% comment %} console.log("{{ operation.question.id }} {{ operation.operator }}") {% endcomment %}
+				calculated_field["operation_question_ids"].push({{ operation.question.id }})
+				calculated_field["operation_question_operators"].push("{{ operation.operator }}")
+			{% endfor %}
+			{% for operation in question.calculation.operation.all %}
+				document.querySelector("#id_question_{{ operation.question.id }}").addEventListener('change', () => { calculation(calculated_field["operation_question_ids"], calculated_field["operation_question_operators"], calculated_field["calculated_question_id"], calculated_field["calculated_question_unit"]) }, false);
+			{% endfor %}
+			console.log("calculated_field", calculated_field)
+		{% endfor %}
+	})
+</script>
+{% endblock %}

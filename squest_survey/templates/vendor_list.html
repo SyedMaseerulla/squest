@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <!-- Main content -->
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1>Squest {{ menu_item.name }} Vendors</h1>
+                    </div>
+                </div>
+            </div><!-- /.container-fluid -->
+        </section>
+        <div class="content">
+            <div class="row">
+                {% for vendor in vendors %}
+                    <div class="col-lg-3 col-sm-4 mb-3">
+                        <div class="card h-100">
+                            {% if vendor.image %}
+                                <img class="card-img-fit" src="{{ vendor.image.url }}" alt="">
+                            {% else %}
+                                <img class="card-img-fit" src="{% static '/squest/img/no_image.png' %}" alt="">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">
+                                    <a href="{% url 'squest_survey:survey-vendor-list' menu_item=menu_item.slugify vendor_id=vendor.id %}" class="">{{ vendor.name }}</a>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div><!-- end main card-body -->
+        </div>
+    </div>
+{% endblock %}

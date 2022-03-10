@@ -6,3 +6,5 @@ class OperationType(models.TextChoices):
     CREATE = 'CREATE', _('Create')
     UPDATE = 'UPDATE', _('Update')
     DELETE = 'DELETE', _('Delete')
+    EXTEND = 'EXTEND', _('Extend')
+    SCALEOUT = 'SCALEOUT', _('Scaleout')

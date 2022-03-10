@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% load i18n static%}
+
+{% block content %}
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show" style="margin-left: 251px;" role="alert">
+	<strong>{{ error }}
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+{% endif %}
+<!-- Main content -->
+<div class="content-wrapper">
+	<section class="content-header">
+		<div class="container-fluid">
+			<div class="row mb-2">
+				<div class="col-sm-6">
+					{% if not instance_id or instance_id == 0 %}
+						<h1>Select an instance</h1>
+					{% else %}
+						<h1>Extend instance</h1>
+					{% endif %}
+				</div>
+			</div>
+		</div><!-- /.container-fluid -->
+	</section>
+	<div class="content">
+		<div class="container-fluid">
+			<img class="" src="{% static '/squest/img/edb.png' %}" alt="" style="height: 400px; box-shadow: 5px 5px 5px; margin-bottom: 3vh;">
+			<div class="card">
+				<div class="card-body">
+					<form id="instance_fm" class="form-horizontal" action="{% url 'squest_survey:extend-database' %}" method="post">
+						{% csrf_token %}
+                        <div class="form-group">
+                            <label for="instance_select" class="col-sm-6 control-label">
+                                Instances
+                            </label>
+                            <br>
+                            <div class="col-sm-6">
+                                <select name="instance_select" class="form-control" id="instance_select" required="required">
+                                    <option value="">-------------</option>
+                                    {% for instance in instances %}
+                                        <option value={{ instance.id }}>{{ instance.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+					</form>
+				</div>
+			</div>
+            <div class="card">
+				<div class="card-body">
+					{% if form.errors %}
+					<div class="alert alert-danger" role="alert">
+						{% for field in form %}
+							{% if field.errors %}
+							<li><strong>{{ field.label }}:</strong> {{ field.errors|striptags }}</li>
+							{% endif %}
+						{% endfor %}
+						{% if form.non_field_errors %}
+							{{ form.non_field_errors }}
+						{% endif %}
+					</div>
+					{% endif %}
+					<form id="edb_fm" class="form-horizontal" action="{% url 'squest_survey:extend-database-request' instance_id=instance_id %}" method="post">
+						{% csrf_token %}
+
+                        {% for edb_form in edb_forms %}
+                        <div class="card">
+                            <h5 class="card-header">{{ edb_form.category.description }}</h5>
+                            <div class="card-body">
+                                {% for field in edb_form %}
+                                <div class="form-group {% if field.errors %}has-error{% endif %}">
+                                    <label for="{{ field.name }}" class="col-sm-6 control-label">
+                                        {{ field.label|safe }}
+                                        {% if field.field.required %}
+                                        <span class="fa fa-asterisk" style="color:red"> </span>
+                                        {% endif %}
+                                    </label>
+                                    <span class="help-inline" style="color:red">
+                                        <strong> {% for error in field.errors %}{{ error }}{% endfor %} </strong>
+                                    </span>
+                                    <br>
+                                    <div class="col-sm-6">
+                                        {{ field }}
+                                        {% if field.help_text %}
+                                        <small class="form-text text-muted">{{ field.help_text|safe }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+
+						<div class="form-group">
+							<div class="col-sm-offset-2 col-sm-10">
+								<!-- validate button -->
+								<button class="btn btn-success" type="submit" {% if not edb_forms %}disabled{% endif %}>
+									<i class="nav-icon fas fa-shopping-cart"></i>
+                                    {% blocktrans %}Extend Database!{% endblocktrans %}
+								</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div><!-- end container fluid -->
+	</div>
+</div>
+
+<script type="text/javascript">
+
+	function do_math(v1, op, v2) {
+		switch (op) {
+			case "+": return v1 + v2
+			case "-": return v1 - v2
+			case "×": return v1 * v2
+			case "÷": return v1 / v2
+		}
+	}
+
+	function calculation(question_ids, operators, calculated_question_id, calculated_question_unit) {
+		{% comment %} console.log("calculation", question_ids, operators, calculated_question_id, calculated_question_unit) {% endcomment %}
+		var valid = true
+		for (let i = 0; i < question_ids.length; i++) {
+			let value = document.querySelector("#id_extend_question_" + question_ids[i]).value
+			if (!/^[\d]+$/.test(value)) {
+				valid = false
+				break
+			}
+		}
+		if (valid) {
+			var result = Number(document.querySelector("#id_extend_question_" + question_ids[0]).value)
+			{% comment %} console.log("result", result) {% endcomment %}
+			for (let i = 1; i < question_ids.length; i++) {
+				let operator = operators[i - 1]
+				let value = Number(document.querySelector("#id_extend_question_" + question_ids[i]).value)
+				result = do_math(result, operator, value)
+				{% comment %} console.log(result, operator, value) {% endcomment %}
+			}
+			{% comment %} console.log("result", result) {% endcomment %}
+			document.querySelector("#id_extend_question_" + calculated_question_id).value = result + calculated_question_unit
+		}
+	}
+
+	$(() => {
+		var edb_question_ids = []
+		let edb_questions = document.querySelectorAll('[id^="id_extend_question"]')
+		edb_questions.forEach(element => {
+			edb_question_ids.push(parseInt(element.id.split('_').pop()))
+		});
+        $("#instance_select option[value='{{ instance_id }}']").prop("selected", true)
+		$("#instance_select").change(function() {
+            if (document.forms["instance_fm"].reportValidity()) {
+                $("#instance_fm").submit()
+			}
+		})
+		$qn1 = document.querySelector("#id_extend_question_" + edb_question_ids[0])
+		if ($qn1) {
+			$qn1.addEventListener('change', () => {
+				calculation(edb_question_ids.slice(0, 2), ["×", "="], edb_question_ids[2], "GB")
+			}, false)
+		}
+		$qn2 = document.querySelector("#id_extend_question_" + edb_question_ids[1])
+		if ($qn2) {
+			$qn2.addEventListener('change', () => {
+				calculation(edb_question_ids.slice(0, 2), ["×", "="], edb_question_ids[2], "GB")
+			}, false)
+		}
+	})
+</script>
+{% endblock %}

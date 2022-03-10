@@ -39,9 +39,10 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('ui/', home, name='home'),
     path('', lambda req: redirect('home')),
-    path('admin/', admin.site.urls),
+    
     path('ui/service_catalog/', include('service_catalog.urls')),
     path('ui/resource_tracker/', include('resource_tracker.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
@@ -54,6 +55,7 @@ urlpatterns = [
     url(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     url(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('martor/', include('martor.urls')),
+    path('squest_survey/', include(('squest_survey.urls', 'squest_survey'), namespace='squest_survey')),
     url(
         r'^api/uploader/$',
         markdown_uploader, name='markdown_uploader_page'

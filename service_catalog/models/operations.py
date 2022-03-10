@@ -7,6 +7,19 @@ from django.utils.translation import ugettext_lazy as _
 from service_catalog.models import JobTemplate, OperationType
 from service_catalog.models import Service
 
+class IconType(models.TextChoices):
+    Cog = 'fas fa-cog', _('Cog')
+    Play = 'fas fa-play', _('Play')
+    Stop = 'fas fa-stop', _('Stop')
+    File = 'fas fa-file', _('File')
+    Patch = 'fas fa-folder-plus', _('Patch')
+    Explore = 'fab fa-wpexplorer', _('Explore')
+    Clone = 'fas fa-clone', _('Clone')
+    Restore = 'fas fa-window-restore', _('Restore')
+    LevelUp = 'fas fa-level-up-alt', _('LevelUp')
+    HardDisk = 'fas fa-hdd', _('HardDisk')
+    Deprov = 'fas fa-sort-desc', _('Deprov')
+
 
 class Operation(models.Model):
     name = models.CharField(max_length=100, verbose_name="Operation name")
@@ -23,6 +36,14 @@ class Operation(models.Model):
     auto_accept = models.BooleanField(default=False, blank=True)
     auto_process = models.BooleanField(default=False, blank=True)
     process_timeout_second = models.IntegerField(default=60, verbose_name="Process timeout (s)")
+    icon = models.CharField(
+        max_length=40,
+        choices=IconType.choices,
+        default=IconType.Cog,
+    )
+    def __str__(self):
+        return f"{self.name} ({self.service.name})"
+
 
     def __str__(self):
         return f"{self.name} ({self.service})"

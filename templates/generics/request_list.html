@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <!-- Main content -->
+    <div class="row" style="background-color:#ffffff">
+    <div class="col-sm-3"></div>
+    <div class="content-wrapper col-sm-9" style="background-color:#ffffff">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h4>Requests</h4>
+                    </div>
+                </div>
+            </div><!-- /.container-fluid -->
+        </section>
+        <!--<div class="content"> -->
+            <!--<div class="container-fluid">-->
+               <!-- <div class="card">-->
+
+                    <div class="card-body" style="background-color:#ffffff">
+                        <table id="request_list" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Subscription</th>
+                                <th>User</th>
+                                <th>Created</th>
+                                <!--<th>Date complete</th>-->
+                                <th>Service</th>
+                                <th>Operation name</th>
+                                <th>Operation</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {%  for o_request in requests %}
+                                <tr>
+                                    <td class="align-middle">
+                                        <a style="color:#2e2e2e;font-size:12px;font-family: Arial, Helvetica, sans-serif">
+                                            {{ o_request.instance.name }}
+                                        </a>
+                                    </td>
+                                    <td style="color:#2e2e2e;font-size:12px;font-family: Arial, Helvetica, sans-serif" class="align-middle">
+                                        {{ o_request.user.username }}
+                                    </td>
+                                    <td style="color:#2e2e2e;font-size:12px;font-family: Arial, Helvetica, sans-serif;" class="align-middle">
+                                        {{ o_request.date_submitted }}
+                                    </td>
+                                    <!--<td style="color:#2e2e2e;font-size:12px;font-family: Arial, Helvetica, sans-serif" class="align-middle">
+                                        {{ o_request.date_complete }}
+                                    </td>-->
+                                    <td class="align-middle"><a style="color:#2e2e2e;font-size:12px;font-family: Arial, Helvetica, sans-serif;" >{{ o_request.instance.service.name }}</a></td>
+                                    <td class="align-middle"><a style="color:#2e2e2e;font-size:12px;font-family: Arial, Helvetica, sans-serif;">{{ o_request.operation.name }}</a></td>
+                                    <td style="width: 10%" class="align-middle">
+                                        <a style="color:#2e2e2e;font-size:12px;font-family: Arial, Helvetica, sans-serif" class="{{ o_request.operation.type |map_operation_type }}" {%  if o_request.fill_in_survey %}data-toggle="popover" title="{{ o_request.operation.job_template.name }}" data-content="{{ o_request.fill_in_survey }}{% endif %}">
+                                            {{ o_request.operation.type }}
+                                        </a>
+                                    </td>
+                                    {% if o_request.state == "ACCEPTED" %}
+                                        <td style="width: 10%" class="align-middle"><h6><span class="badge badge-pill bg-{{ o_request.state |map_request_state }} ">SUBMITTED</span></h6></td>
+                                    {% else %}
+                                        <td style="width: 10%" class="align-middle"><h6><span class="badge badge-pill bg-{{ o_request.state |map_request_state }} ">{{ o_request.state }}</span></h6></td>
+                                    {% endif %}
+                                    <td class="align-middle">
+                                        <div class="row">
+                                            <a href="{% url 'service_catalog:request_comment'  o_request.id %}" class="btn btn-default"
+                                               title="Comments">
+                                                <i class="fas fa-comments text-primary"></i> <span
+                                                    class="badge badge-default">{{ o_request.comments.all|length }}</span>
+                                            </a>
+                                            {% if request.user.is_superuser %}
+                                                <div class="dropdown pl-1">
+                                                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                    </button>
+                                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                        {% if o_request.state == "COMPLETE" %}
+                                                            <a class="dropdown-item {{ o_request.id |is_action_dropdown_disabled:'archive' }}"
+                                                               href="{% url 'service_catalog:admin_request_archive' o_request.id %}">
+                                                                <span class="{{ o_request.id |get_action_text_class:"archive" }} fas fa-archive"></span> Archive
+                                                            </a>
+                                                        {% endif %}
+                                                        {% if o_request.state == "ARCHIVED" %}
+                                                            <a class="dropdown-item {{ o_request.id |is_action_dropdown_disabled:'unarchive' }}"
+                                                               href="{% url 'service_catalog:admin_request_archive' o_request.id %}">
+                                                                <span class="{{ o_request.id |get_action_text_class:"unarchive" }} fas fa-box-open"></span> Unarchive
+                                                            </a>
+                                                        {% endif %}
+                                                        {% if o_request.state == "NEED_INFO" %}
+                                                            <a class="dropdown-item {{ o_request.id |is_action_dropdown_disabled:"re_submit" }}"
+                                                               href="{% url 'service_catalog:admin_request_re_submit' o_request.id %}"><span
+                                                                    class="{{ o_request.id |get_action_text_class:"re_submit" }} fas fa-redo"></span> Reset to
+                                                                submitted</a>
+                                                        {% endif %}
+                                                        <a class="dropdown-item {{ o_request.id |is_action_dropdown_disabled:"cancel" }}"
+                                                           href="{% url 'service_catalog:request_cancel' o_request.id %}"><span
+                                                                class="{{ o_request.id |get_action_text_class:"cancel" }} fas fa-window-close"></span> Cancel</a>
+                                                        <a class="dropdown-item {{ o_request.id |is_action_dropdown_disabled:"need_info" }}"
+                                                           href="{% url 'service_catalog:admin_request_need_info' o_request.id %}"><span
+                                                                class="{{ o_request.id |get_action_text_class:"need_info" }} fas fa-info-circle"></span> Ask more
+                                                            info</a>
+                                                        <a class="dropdown-item {{ o_request.id |is_action_dropdown_disabled:"reject" }}"
+                                                           href="{% url 'service_catalog:admin_request_reject' o_request.id %}"><span
+                                                                class="{{ o_request.id |get_action_text_class:"reject" }} fas fa-ban"></span> Reject</a>
+                                                        <a class="dropdown-item {{ o_request.id |is_action_dropdown_disabled:"accept" }}"
+                                                           href="{% url 'service_catalog:admin_request_accept' o_request.id %}"><span
+                                                                class="{{ o_request.id |get_action_text_class:"accept" }} fas fa-clipboard-check"></span>
+                                                            Review</a>
+                                                        <a class="dropdown-item {{ o_request.id |is_action_dropdown_disabled:"process" }}"
+                                                           href="{% url 'service_catalog:admin_request_process' o_request.id %}"><span
+                                                                class="{{ o_request.id |get_action_text_class:"process" }} fas fa-play"></span> Process</a>
+                                                    </div>
+                                                </div>
+                                        
+                                            {% else %}
+                                                <div class="pl-1">
+                                                    {% if record.state in 'SUBMITTED,NEED_INFO,REJECTED' %}
+                                                        <a href="{% url 'service_catalog:request_cancel' record.id %}"
+                                                           class="btn btn-danger bg-sm" title="Cancel request">
+                                                            <i class="fas fa-ban"></i>
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        </div>                                        
+                                        
+                                    </td>
+                                </tr>
+                            {%  endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                <!--</div>--><!-- end container fluid -->
+            <!--</div>-->
+        <!--</div>-->
+    </div>
+</div>
+{% endblock %}

@@ -60,13 +60,24 @@ if BACKUP_ENABLED:
     print(f"BACKUP_CRONTAB: {BACKUP_CRONTAB}")
 
 # Application definition
-INSTALLED_APPS = [
+DJANGO_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+]
+
+LOCAL_APPS = [
+    'squest_survey',
+    'service_catalog',
+    'resource_tracker',
+    'profiles',
+]
+
+THIRD_PARTY_APPS = [
     'rest_framework',
     'django_celery_results',
     'django_celery_beat',
@@ -79,13 +90,19 @@ INSTALLED_APPS = [
     'martor',
     'django_tables2',
     'dbbackup',
-    'service_catalog',
-    'resource_tracker',
-    'profiles',
+    'django_extensions',
+    'debug_toolbar',
+    'sorl.thumbnail',
+    'prettyjson',
+    'colorfield',
     'monitoring',
     'cachalot',
     'django_cleanup.apps.CleanupConfig',  # should stay last to override delete method of our model
 ]
+
+
+
+INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS 
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -95,6 +112,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'squest_survey.middleware.ModelAdminMiddleware',
+
 ]
 
 ROOT_URLCONF = 'Squest.urls'
@@ -111,6 +131,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'squest_survey.context_processors.get_menu_items',
+                'squest_survey.context_processors.get_vendor_items',
             ],
         },
     },
@@ -449,3 +471,28 @@ if TESTING:
     }
 
 print('[Settings] loaded')
+
+# SQUEST SURVEY
+# ------------------------------------------------------------------------------
+CHOICES_SEPARATOR = ','
+
+
+# ------------------------------------------------------------------------------
+# SORL THUMBNAIL https://github.com/jazzband/sorl-thumbnail
+# ------------------------------------------------------------------------------
+THUMBNAIL_PRESERVE_FORMAT = True
+
+# ------------------------------------------------------------------------------
+# JAZZMIN CONFIGURATION https://django-jazzmin.readthedocs.io/configuration/
+# ------------------------------------------------------------------------------
+JAZZMIN_SETTINGS = {
+    'show_sidebar': True,
+    'show_ui_builder': False,
+    'order_with_respect_to': ['auth', 'squest_survey', 'squest_survey.template', 'squest_survey.category', 'squest_survey.question', 'squest_survey.calculation', 'squest_survey.operation', 'squest_survey.response', 'squest_survey.answer', 'squest_survey.menuitem', 'squest_survey.vendoritem', 'squest_survey.edb_template', 'squest_survey.edb_category', 'squest_survey.edb_question', 'squest_survey.so_template', 'squest_survey.so_category', 'squest_survey.so_question', 'squest_survey.subscriptiontemplate', 'squest_survey.subscriptionpanel', 'squest_survey.subscriptiontab', 'squest_survey.subscriptionconfig', 'squest_survey.lca_operator', 'squest_survey.lca_config', 'django_celery_results', 'django_celery_beat'],
+}
+
+JAZZMIN_UI_TWEAKS = {
+    'theme': 'sketchy',
+    'dark_mode_theme': 'cyborg',
+}
+
